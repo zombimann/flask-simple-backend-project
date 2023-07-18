@@ -2,30 +2,33 @@ from flask import jsonify, request
 from app import app, db
 from app.models import Book
 
+# ...
+
 @app.route('/books', methods=['POST'])
 def create_book():
     data = request.get_json()
-    title = data.get('title')
-    author = data.get('author')
+    if 'title' not in data or 'author' not in data:
+        return jsonify({'message': 'Missing required fields'}), 400
 
-    book = Book(title=title, author=author)
+    book = Book(title=data['title'], author=data['author'])
     db.session.add(book)
     db.session.commit()
 
-    return jsonify({'id': book.id, 'title': book.title, 'author': book.author}), 201
+    return jsonify(book.to_dict()), 201
 
 @app.route('/books', methods=['GET'])
 def get_all_books():
     books = Book.query.all()
-    book_list = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
-    return jsonify(book_list)
+    book_list = [book.to_dict() for book in books]
+    return jsonify(book_list), 200
 
 @app.route('/books/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     book = Book.query.get(book_id)
-    if book:
-        return jsonify({'id': book.id, 'title': book.title, 'author': book.author})
-    return jsonify({'message': 'Book not found'}), 404
+    if not book:
+        return jsonify({'message': 'Book not found'}), 404
+
+    return jsonify(book.to_dict()), 200
 
 @app.route('/books/<int:book_id>', methods=['PUT'])
 def update_book(book_id):
@@ -34,14 +37,14 @@ def update_book(book_id):
         return jsonify({'message': 'Book not found'}), 404
 
     data = request.get_json()
-    title = data.get('title')
-    author = data.get('author')
+    if 'title' in data:
+        book.title = data['title']
+    if 'author' in data:
+        book.author = data['author']
 
-    book.title = title
-    book.author = author
     db.session.commit()
 
-    return jsonify({'id': book.id, 'title': book.title, 'author': book.author})
+    return jsonify(book.to_dict()), 200
 
 @app.route('/books/<int:book_id>', methods=['DELETE'])
 def delete_book(book_id):
@@ -52,4 +55,4 @@ def delete_book(book_id):
     db.session.delete(book)
     db.session.commit()
 
-    return jsonify({'message': 'Book deleted'})
+    return jsonify({'message': 'Book deleted'}), 200

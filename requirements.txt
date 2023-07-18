@@ -5,5 +5,3 @@ Flask-Script
 Flask-SQLAlchemy
 marshmallow
 PyMySQL
-
-
