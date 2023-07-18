@@ -1,2 +1,9 @@
+Flask
+Flask-Migrate
+Flask-RESTful
+Flask-Script
+Flask-SQLAlchemy
+marshmallow
+PyMySQL
 
 
